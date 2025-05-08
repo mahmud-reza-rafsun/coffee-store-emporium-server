@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 const app = express();
@@ -21,6 +21,8 @@ const client = new MongoClient(uri, {
     }
 });
 
+// 56 - 6 : 9:06
+
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
@@ -34,11 +36,46 @@ async function run() {
             res.send(newCoffee);
         })
 
+        app.get('/coffee/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const coffee = await coffeeCollection.findOne(query);
+            res.send(coffee);
+        })
+
         app.post('/coffee', async (req, res) => {
             const coffee = req.body;
             console.log(coffee);
             const newCoffee = await coffeeCollection.insertOne(coffee);
             res.send(newCoffee);
+        })
+
+        app.put('/coffee/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const coffee = req.body;
+            const coffeeDoc = {
+                $set: {
+                    name: coffee.name,
+                    price: coffee.price,
+                    supplier: coffee.supplier,
+                    taste: coffee.taste,
+                    category: coffee.category,
+                    details: coffee.details,
+                    photo: coffee.photo,
+                }
+            }
+            const updateCoffee = await coffeeCollection.updateOne(filter, coffeeDoc, options);
+            res.send(updateCoffee);
+        })
+
+        app.delete('/coffee/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log("id is", id)
+            const query = { _id: new ObjectId(id) }
+            const coffee = await coffeeCollection.deleteOne(query);
+            res.send(coffee);
         })
 
         // Send a ping to confirm a successful connection
