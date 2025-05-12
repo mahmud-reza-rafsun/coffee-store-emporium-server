@@ -29,6 +29,7 @@ async function run() {
         await client.connect();
 
         const coffeeCollection = client.db('coffeeDB').collection('coffee');
+        const usersCollection = client.db('coffeeDB').collection('users');
 
         app.get('/coffee', async (req, res) => {
             const coffeeCursor = coffeeCollection.find();
@@ -77,6 +78,24 @@ async function run() {
             const coffee = await coffeeCollection.deleteOne(query);
             res.send(coffee);
         })
+        // user 
+        app.post('/users', async (req, res) => {
+            const newUsers = req.body;
+            console.log(newUsers);
+            const result = await usersCollection.insertOne(newUsers);
+            res.send(result);
+        })
+        app.get('/users', async (req, res) => {
+            const usersCursor = usersCollection.find();
+            const newUsers = await usersCursor.toArray();
+            res.send(newUsers);
+        })
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const deleteUsers = await usersCollection.deleteOne(query);
+            res.send(deleteUsers);
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
@@ -90,7 +109,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('server is running');
+    res.send('coffee server is running');
 })
 
 app.listen(port, () => {
