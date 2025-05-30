@@ -26,7 +26,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        client.connect();
 
         const coffeeCollection = client.db('coffeeDB').collection('coffee');
         const usersCollection = client.db('coffeeDB').collection('users');
@@ -95,6 +95,17 @@ async function run() {
             const query = { _id: new ObjectId(id) }
             const deleteUsers = await usersCollection.deleteOne(query);
             res.send(deleteUsers);
+        })
+        app.patch('/users', async (req, res) => {
+            const email = req.body.email;
+            const filter = { email };
+            const updateInfo = {
+                $set: {
+                    lastLogInTime: req?.body?.lastSignInTime
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateInfo);
+            res.send(result);
         })
 
         // Send a ping to confirm a successful connection
