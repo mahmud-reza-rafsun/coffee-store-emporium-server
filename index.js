@@ -123,6 +123,4 @@ app.get('/', (req, res) => {
     res.send('coffee server is running');
 })
 
-app.listen(port, () => {
-    console.log(`port is running on port: ${port}`);
-})
+module.exports = app;
